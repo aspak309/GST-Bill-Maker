@@ -7,7 +7,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -37,32 +38,33 @@ const googleProvider = new GoogleAuthProvider();
 
 
 // ================================
-// GOOGLE LOGIN
+// GOOGLE LOGIN (REDIRECT METHOD)
 // ================================
 
 const googleLoginBtn = document.getElementById("googleLoginBtn");
 const loginError = document.getElementById("loginError");
 
+// Handle redirect result when user comes back from Google login page
+getRedirectResult(auth).catch((error) => {
+  console.error("Redirect Login Error:", error);
+  if (loginError) {
+    loginError.textContent = "Google login failed. Please try again.";
+    loginError.classList.remove("hidden");
+  }
+});
+
 googleLoginBtn?.addEventListener("click", async () => {
-
   try {
-
     loginError?.classList.add("hidden");
-
-    await signInWithPopup(auth, googleProvider);
-
+    // Using redirect instead of popup to prevent mobile browser blocking issues
+    await signInWithRedirect(auth, googleProvider);
   } catch (error) {
-
     console.error("Google Login Error:", error);
-
     if (loginError) {
-      loginError.textContent =
-        "Google login failed. Please try again.";
+      loginError.textContent = "Google login failed. Please try again.";
       loginError.classList.remove("hidden");
     }
-
   }
-
 });
 
 
@@ -73,17 +75,11 @@ googleLoginBtn?.addEventListener("click", async () => {
 const logoutBtn = document.getElementById("logoutBtn");
 
 logoutBtn?.addEventListener("click", async () => {
-
   try {
-
     await signOut(auth);
-
   } catch (error) {
-
     console.error("Logout Error:", error);
-
   }
-
 });
 
 
@@ -96,20 +92,15 @@ const appPage = document.getElementById("appPage");
 const userName = document.getElementById("userName");
 
 onAuthStateChanged(auth, (user) => {
-
   if (user) {
-
     // User logged in
     loginPage?.classList.add("hidden");
     appPage?.classList.remove("hidden");
 
     if (userName) {
-      userName.textContent =
-        user.displayName || user.email || "";
+      userName.textContent = user.displayName || user.email || "";
     }
-
   } else {
-
     // User logged out
     appPage?.classList.add("hidden");
     loginPage?.classList.remove("hidden");
@@ -117,12 +108,10 @@ onAuthStateChanged(auth, (user) => {
     if (userName) {
       userName.textContent = "";
     }
-
   }
-
 });
 
 
 // ==================================================
-// GST BILL MAKER CODE YAHAN SE START HOGA
+// GST BILL MAKER CODE
 // ==================================================
