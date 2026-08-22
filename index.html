@@ -5,69 +5,139 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GST Bill Maker — Professional GST Invoice Generator</title>
 <meta name="description" content="Create professional GST invoices online with CGST, SGST and IGST calculation and download an A4 PDF.">
-<meta name="google-site-verification" content="92rAyPFFCiIIPwPW431_dsHlI8AblXNmTvxjUoAxztI">
-<link rel="canonical" href="https://YOUR-DOMAIN.vercel.app/">
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- html2pdf Library for PDF Download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 body{font-family:Inter,system-ui,sans-serif}.field{width:100%;border:1px solid #cbd5e1;border-radius:12px;padding:11px 12px;background:#fff;outline:none}.field:focus{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe}.label{display:block;font-size:12px;font-weight:800;color:#475569;margin-bottom:6px}
-.invoice-paper{width:210mm;min-height:297mm;background:#fff}.invoice-table tbody tr:nth-child(even){background:#f8fafc}
+.invoice-paper{width:210mm;min-height:297mm;background:#fff;box-sizing:border-box}.invoice-table tbody tr:nth-child(even){background:#f8fafc}
 @media(max-width:900px){.invoice-paper{transform-origin:top left}}
 </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
+
+<!-- Login Page -->
 <section id="loginPage" class="min-h-screen grid place-items-center p-5 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950">
-<div class="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl">
-<div class="w-14 h-14 rounded-2xl bg-slate-950 text-white grid place-items-center font-black mb-5">GB</div>
-<h1 class="text-3xl font-black">GST Bill Maker</h1><p class="mt-2 text-slate-500">Professional GST invoice generator</p>
-<button id="googleLoginBtn" class="mt-7 w-full bg-slate-950 text-white rounded-2xl py-4 font-bold">Continue with Google</button>
-<p id="loginError" class="hidden mt-3 p-3 rounded-xl bg-red-50 text-red-700 text-sm"></p>
-</div></section>
-
-<main id="appPage" class="hidden">
-<header class="bg-slate-950 text-white sticky top-0 z-30"><div class="max-w-7xl mx-auto px-5 py-4 flex justify-between items-center">
-<div><b class="text-xl">GST Bill Maker</b><div class="text-xs text-slate-400">Professional Invoice Generator</div></div>
-<div class="flex gap-3 items-center"><span id="userName" class="hidden sm:block text-sm text-slate-300"></span><button id="logoutBtn" class="bg-white/10 px-4 py-2 rounded-xl">Logout</button></div>
-</div></header>
-<div class="max-w-7xl mx-auto p-5 space-y-6">
-<div class="border border-amber-200 bg-amber-50 rounded-2xl p-4">
-<b>⚠️ Important: Please download your PDF invoice immediately after generating.</b>
-<div class="text-sm mt-1">⚠️ महत्वपूर्ण सूचना: कृपया बिल बनाने के तुरंत बाद अपना PDF डाउनलोड कर लें। सुरक्षा कारणों से हम आपके बिल अपने सर्वर पर सेव नहीं करते हैं।</div>
-<div class="text-xs mt-2 text-amber-800">🚀 As this platform grows, we will launch new premium features (like cloud bill storage). Till then, enjoy this fast, free tool!</div>
-</div>
-
-<div class="grid xl:grid-cols-[1fr_380px] gap-6">
-<section class="space-y-6">
-<div class="bg-white rounded-3xl border p-6 shadow-sm">
-<h2 class="text-xl font-black">Invoice Details</h2><p class="text-sm text-slate-500 mb-5">Seller and buyer information</p>
-<div class="grid md:grid-cols-2 gap-5">
-<div class="bg-slate-50 rounded-2xl p-5 border"><h3 class="font-black mb-4">Seller Details</h3>
-<input id="sellerName" class="field mb-3" placeholder="Business / Company Name *"><textarea id="sellerAddress" class="field mb-3" rows="2" placeholder="Business Address *"></textarea><input id="sellerGSTIN" class="field mb-3" placeholder="Seller GSTIN *"><input id="sellerState" class="field mb-3" placeholder="Seller State *"><input id="logoInput" type="file" accept="image/*" class="text-sm">
-</div>
-<div class="bg-blue-50 rounded-2xl p-5 border border-blue-100"><h3 class="font-black mb-4">Buyer Details</h3>
-<input id="buyerName" class="field mb-3" placeholder="Client / Company Name *"><textarea id="buyerAddress" class="field mb-3" rows="2" placeholder="Buyer Address *"></textarea><input id="buyerGSTIN" class="field mb-3" placeholder="Buyer GSTIN *"><input id="buyerState" class="field" placeholder="Buyer State *">
-</div></div>
-<div class="grid sm:grid-cols-3 gap-4 mt-5"><label><span class="label">Invoice Number *</span><input id="invoiceNumber" class="field" value="INV-001"></label><label><span class="label">Invoice Date *</span><input id="invoiceDate" type="date" class="field"></label><label><span class="label">Place of Supply</span><input id="placeSupply" class="field"></label></div>
-</div>
-
-<div class="bg-white rounded-3xl border p-6 shadow-sm">
-<div class="flex justify-between items-center gap-3"><div><h2 class="text-xl font-black">Items</h2><p class="text-sm text-slate-500">Add products/services and GST rates</p></div><button id="addItemBtn" class="bg-slate-950 text-white rounded-xl px-4 py-3 font-bold">+ Add Item</button></div>
-<div class="mt-4 bg-blue-50 border border-blue-100 rounded-2xl p-4 text-sm"><b>Help — GST Invoice Rules:</b> Provide a unique Invoice Number, valid Buyer & Seller GSTIN, and correct HSN/SAC Code for each item. HSN/SAC is required.</div>
-<div class="overflow-x-auto mt-5"><table class="w-full min-w-[800px] text-sm"><thead><tr class="bg-slate-900 text-white"><th class="p-3">#</th><th class="p-3 text-left">Item</th><th class="p-3">HSN/SAC</th><th class="p-3">Qty</th><th class="p-3">Rate</th><th class="p-3">GST</th><th class="p-3">Amount</th><th></th></tr></thead><tbody id="itemsBody"></tbody></table></div>
-</div>
-
-<div class="bg-white rounded-3xl border p-6 shadow-sm"><h2 class="text-xl font-black mb-4">Notes & Terms</h2><div class="grid md:grid-cols-2 gap-4"><textarea id="notes" class="field" rows="4" placeholder="Payment details / Notes"></textarea><textarea id="terms" class="field" rows="4" placeholder="Terms & Conditions"></textarea></div></div>
-<div class="flex flex-col sm:flex-row gap-3"><button id="previewBtn" class="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black">Preview Bill</button><button id="downloadBtn" class="flex-1 py-4 rounded-2xl bg-slate-950 text-white font-black">Download Professional PDF</button></div>
+    <div class="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl text-center">
+        <div class="w-14 h-14 rounded-2xl bg-slate-950 text-white grid place-items-center font-black mx-auto mb-5 text-xl">GB</div>
+        <h1 class="text-3xl font-black">GST Bill Maker</h1>
+        <p class="mt-2 text-slate-500 text-sm">Professional GST invoice generator</p>
+        <button id="googleLoginBtn" class="mt-7 w-full bg-slate-950 hover:bg-slate-800 transition text-white rounded-2xl py-4 font-bold flex justify-center items-center gap-2">
+            Continue with Google
+        </button>
+        <p id="loginError" class="hidden mt-3 p-3 rounded-xl bg-red-50 text-red-700 text-sm"></p>
+    </div>
 </section>
 
-<aside class="xl:sticky xl:top-24 h-fit"><div class="bg-slate-950 text-white rounded-3xl p-6 shadow-xl"><div class="text-slate-400 text-sm">Grand Total</div><div id="summaryGrand" class="text-4xl font-black mt-2">₹0.00</div><div class="h-px bg-white/10 my-6"></div>
-<div class="space-y-3 text-sm"><div class="flex justify-between"><span class="text-slate-400">Taxable Amount</span><b id="summaryTaxable">₹0.00</b></div><div class="flex justify-between"><span class="text-slate-400">CGST</span><b id="summaryCGST">₹0.00</b></div><div class="flex justify-between"><span class="text-slate-400">SGST</span><b id="summarySGST">₹0.00</b></div><div class="flex justify-between"><span class="text-slate-400">IGST</span><b id="summaryIGST">₹0.00</b></div></div><div class="mt-6 bg-white/5 rounded-2xl p-4"><small class="text-slate-500">TAX MODE</small><div id="summaryMode" class="font-bold mt-1">—</div></div></div></aside>
-</div></div></main>
+<!-- Main App Page -->
+<main id="appPage" class="hidden">
+    <header class="bg-slate-950 text-white sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-5 py-4 flex justify-between items-center">
+            <div><b class="text-xl">GST Bill Maker</b><div class="text-xs text-slate-400">Professional Invoice Generator</div></div>
+            <div class="flex gap-3 items-center">
+                <span id="userName" class="hidden sm:block text-sm text-slate-300"></span>
+                <button id="logoutBtn" class="bg-white/10 hover:bg-red-500 hover:text-white transition px-4 py-2 rounded-xl text-sm font-medium">Logout</button>
+            </div>
+        </div>
+    </header>
+    <div class="max-w-7xl mx-auto p-5 space-y-6">
+        <div class="grid xl:grid-cols-[1fr_380px] gap-6">
+            <section class="space-y-6">
+                <!-- Details Section -->
+                <div class="bg-white rounded-3xl border p-6 shadow-sm">
+                    <h2 class="text-xl font-black">Invoice Details</h2><p class="text-sm text-slate-500 mb-5">Seller and buyer information</p>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="bg-slate-50 rounded-2xl p-5 border"><h3 class="font-black mb-4 text-indigo-900">Seller Details (From)</h3>
+                            <input id="sellerName" class="field mb-3" placeholder="Business / Company Name *">
+                            <textarea id="sellerAddress" class="field mb-3" rows="2" placeholder="Business Address *"></textarea>
+                            <input id="sellerGSTIN" class="field mb-3" placeholder="Seller GSTIN *">
+                            <select id="sellerState" class="field mb-3">
+                                <option value="" disabled selected>Select Seller State *</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Haryana">Haryana</option>
+                            </select>
+                        </div>
+                        <div class="bg-blue-50 rounded-2xl p-5 border border-blue-100"><h3 class="font-black mb-4 text-blue-900">Buyer Details (To)</h3>
+                            <input id="buyerName" class="field mb-3" placeholder="Client / Company Name *">
+                            <textarea id="buyerAddress" class="field mb-3" rows="2" placeholder="Buyer Address *"></textarea>
+                            <input id="buyerGSTIN" class="field mb-3" placeholder="Buyer GSTIN (Optional)">
+                            <select id="buyerState" class="field">
+                                <option value="" disabled selected>Select Buyer State *</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Haryana">Haryana</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid sm:grid-cols-3 gap-4 mt-5">
+                        <label><span class="label">Invoice Number *</span><input id="invoiceNumber" class="field" value="INV-001"></label>
+                        <label><span class="label">Invoice Date *</span><input id="invoiceDate" type="date" class="field"></label>
+                        <label><span class="label">Place of Supply</span><input id="placeSupply" class="field" placeholder="E.g., Punjab"></label>
+                    </div>
+                </div>
 
-<div id="previewModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 p-3 overflow-auto"><div class="max-w-5xl mx-auto bg-white rounded-2xl overflow-hidden">
-<div class="bg-slate-950 text-white p-3 flex justify-between"><b>Invoice Preview</b><div><button id="previewDownloadBtn" class="bg-blue-600 px-4 py-2 rounded-lg">Download PDF</button><button id="closePreviewBtn" class="ml-2 bg-white/10 px-4 py-2 rounded-lg">Close</button></div></div>
-<div id="invoicePreview" class="invoice-paper mx-auto"></div></div></div>
-<script type="module" src="./app.js"></script>
-</body></html>
+                <!-- Items Section -->
+                <div class="bg-white rounded-3xl border p-6 shadow-sm">
+                    <div class="flex justify-between items-center gap-3">
+                        <div><h2 class="text-xl font-black">Items</h2><p class="text-sm text-slate-500">Add products/services and GST rates</p></div>
+                        <button id="addItemBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-3 font-bold text-sm shadow-lg">+ Add Item</button>
+                    </div>
+                    <div class="overflow-x-auto mt-5">
+                        <table class="w-full min-w-[800px] text-sm text-left">
+                            <thead>
+                                <tr class="bg-slate-900 text-white rounded-lg">
+                                    <th class="p-3">#</th><th class="p-3">Item Name</th><th class="p-3">HSN/SAC</th><th class="p-3 w-20">Qty</th><th class="p-3 w-28">Rate</th><th class="p-3 w-24">GST</th><th class="p-3">Amount</th><th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsBody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button id="previewBtn" class="flex-1 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-black transition">Preview Bill</button>
+                    <button id="downloadBtn" class="flex-1 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black shadow-lg shadow-blue-600/30 transition">Download Premium PDF</button>
+                </div>
+            </section>
+
+            <!-- Sidebar Summary -->
+            <aside class="xl:sticky xl:top-24 h-fit">
+                <div class="bg-slate-950 text-white rounded-3xl p-6 shadow-2xl">
+                    <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Grand Total</div>
+                    <div id="summaryGrand" class="text-4xl font-black mt-2 text-indigo-400">₹0.00</div>
+                    <div class="h-px bg-white/10 my-6"></div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-400">Taxable Amount</span><b id="summaryTaxable">₹0.00</b></div>
+                        <div class="flex justify-between"><span class="text-slate-400">CGST</span><b id="summaryCGST">₹0.00</b></div>
+                        <div class="flex justify-between"><span class="text-slate-400">SGST</span><b id="summarySGST">₹0.00</b></div>
+                        <div class="flex justify-between"><span class="text-slate-400">IGST</span><b id="summaryIGST">₹0.00</b></div>
+                    </div>
+                    <div class="mt-6 bg-indigo-900/50 rounded-2xl p-4 border border-indigo-500/30">
+                        <small class="text-indigo-300 font-bold tracking-wider">TAX MODE</small>
+                        <div id="summaryMode" class="font-bold mt-1 text-white">—</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</main>
+
+<!-- Hidden Invoice Preview -->
+<div id="previewModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 p-3 overflow-auto flex justify-center items-start pt-10">
+    <div class="max-w-5xl w-full bg-white rounded-2xl overflow-hidden shadow-2xl mb-10">
+        <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+            <b class="text-lg">Premium Invoice Preview</b>
+            <div>
+                <button id="previewDownloadBtn" class="bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-lg font-bold text-sm shadow">Download PDF</button>
+                <button id="closePreviewBtn" class="ml-2 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-5 py-2 rounded-lg font-bold text-sm transition">Close</button>
+            </div>
+        </div>
+        <div id="invoicePreview" class="invoice-paper mx-auto p-10 relative"></div>
+    </div>
+</div>
+
 <script type="module" src="./app.js"></script>
 </body>
 </html>
