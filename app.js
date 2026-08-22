@@ -275,4 +275,9 @@ function downloadPDF() {
 
 if($("downloadBtn")) $("downloadBtn").onclick = downloadPDF;
 if($("previewDownloadBtn")) $("previewDownloadBtn").onclick = downloadPDF;
+googleLoginBtn?.addEventListener("click", () => {
+    alert("बटन काम कर रहा है!"); // बस ये लाइन जोड़ दो
+    signInWithRedirect(auth, provider);
+});
+
 
