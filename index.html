@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GST Bill Maker – Free GST Invoice Generator</title>
+<meta name="description" content="Create GST invoices online, calculate CGST SGST IGST and download an A4 PDF.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script type="module" src="./app.js"></script>
+<style>
+body{font-family:Inter,system-ui,sans-serif}.input{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:11px 12px;outline:0;background:#fff}.input:focus{border-color:#2563eb;box-shadow:0 0 0 3px #2563eb18}.invoice-page{width:210mm;min-height:297mm;margin:auto;background:#fff}@media(max-width:900px){.invoice-page{width:100%;min-height:auto}}@media print{body *{visibility:hidden!important}#invoicePrint,#invoicePrint *{visibility:visible!important}#invoicePrint{position:absolute;left:0;top:0;width:210mm}}
+</style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-800">
+
+<section id="loginPage" class="min-h-screen flex items-center justify-center p-4">
+<div class="w-full max-w-md rounded-3xl bg-white shadow-xl border border-slate-200 p-8 text-center">
+<div class="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-slate-900 text-3xl">🧾</div>
+<h1 class="text-3xl font-extrabold">GST Bill Maker</h1>
+<p class="mt-2 text-slate-500">Free GST Invoice Generator</p>
+<button id="googleLoginBtn" class="mt-8 w-full rounded-xl border border-slate-300 bg-white px-5 py-3.5 font-bold hover:bg-slate-50"><span class="mr-2 text-lg">G</span> Continue with Google</button>
+<p id="loginError" class="hidden mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700"></p>
+<p class="mt-6 text-xs text-slate-400">Invoice data is processed in your browser and is not stored in our database.</p>
+</div>
+</section>
+
+<section id="dashboard" class="hidden">
+<header class="sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
+<div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+<div><h1 class="text-xl font-extrabold sm:text-2xl">🧾 GST Bill Maker</h1><p class="text-xs text-slate-500">Free GST Invoice Generator</p></div>
+<div class="flex items-center gap-3"><div class="hidden text-right sm:block"><div id="userName" class="text-sm font-bold"></div><div id="userEmail" class="text-xs text-slate-500"></div></div><button id="logoutBtn" class="rounded-xl bg-red-50 px-4 py-2 text-sm font-bold text-red-600">Logout</button></div>
+</div></header>
+
+<main class="mx-auto max-w-7xl p-4 sm:p-6">
+<div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+<p class="font-bold text-amber-950">⚠️ Important: Please download your PDF invoice immediately after generating. For your privacy and security, we do not store your bills on our servers.</p>
+<p class="mt-2 text-amber-900">⚠️ महत्वपूर्ण सूचना: कृपया बिल बनाने के तुरंत बाद अपना PDF डाउनलोड कर लें। सुरक्षा कारणों से हम आपके बिल अपने सर्वर पर सेव नहीं करते हैं।</p>
+<p class="mt-3 text-sm text-amber-800">🚀 As this platform grows, we will launch new premium features (like cloud bill storage). Till then, enjoy this fast, free tool!</p>
+</div>
+
+<form id="invoiceForm" novalidate>
+<section class="mb-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-6">
+<h2 class="mb-5 text-xl font-extrabold">Seller Details</h2>
+<div class="grid gap-4 md:grid-cols-2">
+<label><span class="mb-1 block text-sm font-bold">Company Name *</span><input id="sellerName" class="input" required></label>
+<label><span class="mb-1 block text-sm font-bold">GSTIN *</span><input id="sellerGSTIN" class="input uppercase" maxlength="15" required placeholder="22AAAAA0000A1Z5"></label>
+<label class="md:col-span-2"><span class="mb-1 block text-sm font-bold">Seller Address *</span><textarea id="sellerAddress" class="input" rows="3" required></textarea></label>
+<label><span class="mb-1 block text-sm font-bold">Seller State *</span><input id="sellerState" class="input" required></label>
+<label><span class="mb-1 block text-sm font-bold">Upload Logo</span><input id="logoInput" type="file" accept="image/*" class="block w-full rounded-xl border border-slate-300 p-2 text-sm"></label>
+</div></section>
+
+<section class="mb-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-6">
+<h2 class="mb-5 text-xl font-extrabold">Buyer Details</h2>
+<div class="grid gap-4 md:grid-cols-2">
+<label><span class="mb-1 block text-sm font-bold">Buyer Name *</span><input id="buyerName" class="input" required></label>
+<label><span class="mb-1 block text-sm font-bold">Buyer GSTIN</span><input id="buyerGSTIN" class="input uppercase" maxlength="15"></label>
+<label class="md:col-span-2"><span class="mb-1 block text-sm font-bold">Buyer Address *</span><textarea id="buyerAddress" class="input" rows="3" required></textarea></label>
+<label><span class="mb-1 block text-sm font-bold">Buyer State *</span><input id="buyerState" class="input" required></label>
+<label><span class="mb-1 block text-sm font-bold">Invoice Number *</span><input id="invoiceNumber" class="input" required placeholder="INV-001"></label>
+<label><span class="mb-1 block text-sm font-bold">Invoice Date *</span><input id="invoiceDate" type="date" class="input" required></label>
+</div></section>
+
+<div class="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+<h3 class="font-extrabold text-blue-950">💡 GST Invoice Help</h3>
+<p class="mt-1 text-sm text-blue-900">For a valid GST Invoice, ensure you provide:</p>
+<ol class="mt-2 list-decimal space-y-1 pl-5 text-sm text-blue-900"><li>A unique Invoice Number (e.g., INV-001, INV-002)</li><li>Valid Buyer &amp; Seller GSTIN, where applicable</li><li>Correct HSN/SAC Code for each item</li></ol>
+</div>
+
+<section class="mb-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-6">
+<div class="mb-5 flex flex-wrap items-center justify-between gap-3"><h2 class="text-xl font-extrabold">Items</h2><button type="button" id="addItemBtn" class="rounded-xl bg-slate-900 px-4 py-2.5 font-bold text-white">+ Add New Item</button></div>
+<div class="overflow-x-auto"><table class="w-full min-w-[980px] text-sm"><thead class="bg-slate-100"><tr>
+<th class="p-3 text-left">S.No</th><th class="p-3 text-left">Item</th><th class="p-3 text-left">HSN/SAC *</th><th class="p-3">Qty</th><th class="p-3">Price</th><th class="p-3">GST</th><th class="p-3 text-right">Taxable</th><th class="p-3 text-right">Total</th><th></th>
+</tr></thead><tbody id="itemsBody"></tbody></table></div>
+</section>
+
+<section class="mb-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-6">
+<div class="grid gap-4 lg:grid-cols-2"><div><h2 class="mb-3 text-lg font-extrabold">Tax Type</h2>
+<div class="flex flex-wrap gap-5 text-sm"><label><input type="radio" name="taxType" value="intra" checked> Same State — CGST + SGST</label><label><input type="radio" name="taxType" value="inter"> Other State — IGST</label></div></div>
+<div class="rounded-xl bg-slate-50 p-4">
+<div class="flex justify-between py-1">Taxable Amount <b id="subtotal">₹0.00</b></div><div class="flex justify-between py-1">CGST <b id="cgstTotal">₹0.00</b></div><div class="flex justify-between py-1">SGST <b id="sgstTotal">₹0.00</b></div><div class="flex justify-between py-1">IGST <b id="igstTotal">₹0.00</b></div><div class="mt-2 flex justify-between border-t pt-3 text-lg font-extrabold">Grand Total <b id="grandTotal">₹0.00</b></div>
+</div></div></section>
+
+<div class="flex flex-wrap justify-end gap-3"><button type="button" id="previewBtn" class="rounded-xl border bg-white px-5 py-3 font-extrabold">👁 Preview Bill</button><button type="button" id="downloadPdfBtn" class="rounded-xl bg-green-600 px-5 py-3 font-extrabold text-white">📥 Download PDF</button></div>
+</form>
+
+<div id="previewWrap" class="mt-8 hidden overflow-x-auto rounded-2xl bg-slate-200 p-3 sm:p-6">
+<div id="invoicePrint" class="invoice-page p-7 text-[12px] sm:p-10">
+<div class="flex justify-between gap-6 border-b-2 border-slate-900 pb-5"><div class="flex gap-4"><img id="pdfLogo" class="hidden h-16 w-16 object-contain" alt="Logo"><div><h2 class="text-2xl font-black">TAX INVOICE</h2><p id="pdfSellerName" class="text-lg font-bold"></p><p id="pdfSellerAddress"></p><p>GSTIN: <b id="pdfSellerGSTIN"></b></p></div></div><div class="text-right"><p>Invoice No: <b id="pdfInvoiceNumber"></b></p><p>Date: <b id="pdfInvoiceDate"></b></p></div></div>
+<div class="mt-6 grid grid-cols-2 gap-8"><div><b>BILL TO</b><p id="pdfBuyerName" class="font-bold"></p><p id="pdfBuyerAddress"></p><p>GSTIN: <b id="pdfBuyerGSTIN"></b></p><p>State: <b id="pdfBuyerState"></b></p></div><div class="text-right">Tax Type: <b id="pdfTaxType"></b></div></div>
+<table class="mt-7 w-full border-collapse border border-slate-400"><thead><tr class="bg-slate-100"><th class="border p-2">#</th><th class="border p-2 text-left">Item</th><th class="border p-2">HSN/SAC</th><th class="border p-2">Qty</th><th class="border p-2">Rate</th><th class="border p-2">GST</th><th class="border p-2">Taxable</th><th class="border p-2">Total</th></tr></thead><tbody id="pdfItems"></tbody></table>
+<div class="mt-5 ml-auto w-full max-w-sm"><div class="flex justify-between py-1">Taxable Amount <b id="pdfSubtotal"></b></div><div class="flex justify-between py-1">CGST <b id="pdfCGST"></b></div><div class="flex justify-between py-1">SGST <b id="pdfSGST"></b></div><div class="flex justify-between py-1">IGST <b id="pdfIGST"></b></div><div class="mt-2 flex justify-between border-t-2 border-slate-900 pt-2 text-base font-black">GRAND TOTAL <b id="pdfGrandTotal"></b></div></div>
+<p class="mt-12 border-t pt-3 text-[10px] text-slate-500">Generated with GST Bill Maker. Verify applicable GST requirements before issuing an invoice.</p>
+</div></div>
+</main></section>
+</body></html>
